@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore Our Spaces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.css">
+<style>
+:root{--teal:#25AF9F;--teal2:#3FD3C2;--aub:#1E1248;--gold:#F7A81A;--melon:#ED6B5E;--cream:#FDF5E6}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-serif;color:var(--aub)}
+.bts-tour{max-width:1280px;margin:0 auto;padding:24px 16px 48px}
+.bts-tour h2{font-size:clamp(30px,4vw,48px);font-weight:800;margin:0 0 6px;line-height:1.05}
+.bts-tour .lede{margin:0 0 20px;font-size:18px;color:#4A4170;max-width:720px}
+
+/* ---------- building map ---------- */
+.map{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:16/8;
+  background:radial-gradient(ellipse at 50% 60%,#ffffff 0%,#E6F6F3 45%,#BFE9E3 100%);
+  box-shadow:0 24px 60px rgba(30,18,72,.18)}
+.map::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 12% 18%,rgba(247,168,26,.18) 0 120px,transparent 121px),
+             radial-gradient(circle at 92% 88%,rgba(237,107,94,.16) 0 160px,transparent 161px)}
+.world{position:absolute;inset:0;transform-origin:0 0;transition:transform .9s cubic-bezier(.2,.7,.2,1);--s:1}
+.world img{position:absolute;left:4%;top:13%;width:92%;height:auto;filter:drop-shadow(0 30px 30px rgba(30,18,72,.28));
+  animation:float 7s ease-in-out infinite;user-select:none;-webkit-user-drag:none}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.pin{position:absolute;transform:translate(-50%,-50%) scale(calc(1 / var(--s)));z-index:2;
+  border:0;background:none;padding:0;cursor:pointer;font-family:'Outfit'}
+.pin .dot{display:block;width:22px;height:22px;border-radius:50%;background:var(--c,var(--gold));border:3px solid #fff;
+  box-shadow:0 0 0 0 var(--c,var(--gold));animation:ping 2s infinite;margin:0 auto}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(255,255,255,.9)}70%{box-shadow:0 0 0 16px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.pin .lbl{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);white-space:nowrap;background:var(--aub);color:#fff;
+  font-weight:800;font-size:14px;padding:7px 13px;border-radius:999px;box-shadow:0 8px 18px rgba(30,18,72,.3);transition:transform .2s}
+.pin .lbl::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--aub);border-bottom:0}
+.pin .peek{position:absolute;left:50%;bottom:72px;transform:translateX(-50%) scale(.6);opacity:0;pointer-events:none;
+  width:220px;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 18px 40px rgba(30,18,72,.35);transition:all .25s}
+.pin .peek img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
+.pin .peek span{display:block;padding:8px 12px;font-size:13px;font-weight:600;color:var(--aub);text-align:left}
+.pin:hover,.pin:focus-visible{z-index:5}
+.pin:hover .peek,.pin:focus-visible .peek{opacity:1;transform:translateX(-50%) scale(1)}
+.pin:hover .lbl{transform:translateX(-50%) scale(1.08)}
+.map.zoomed .pin:not(.active){opacity:.35}
+.map.zoomed .pin.active .peek{display:none}
+
+.topbtn{position:absolute;top:16px;left:16px;z-index:6;display:none;background:var(--aub);color:#fff;border:0;border-radius:999px;padding:10px 18px;font:600 15px 'Outfit';cursor:pointer}
+.map.zoomed .topbtn{display:block}
+.hint{position:absolute;top:16px;right:16px;z-index:6;background:rgba(30,18,72,.85);color:#fff;font-size:14px;padding:7px 14px;border-radius:999px}
+.map.zoomed .hint{display:none}
+
+.card{position:absolute;left:20px;bottom:20px;z-index:6;width:min(360px,calc(100% - 40px));background:rgba(30,18,72,.94);color:#fff;
+  border-radius:22px;padding:18px;display:flex;gap:14px;flex-direction:column;backdrop-filter:blur(6px);
+  transform:translateY(20px);opacity:0;pointer-events:none;transition:all .35s .25s}
+.map.zoomed .card{transform:none;opacity:1;pointer-events:auto}
+.card .tag{font-size:12px;font-weight:600;letter-spacing:2px;color:var(--teal2);text-transform:uppercase}
+.card h3{margin:2px 0 0;font-size:26px;font-weight:800;color:var(--gold);line-height:1.1}
+.card p{margin:0;font-size:15px;line-height:1.45;color:#E8E4F5}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--aub);border:0;border-radius:999px;
+  padding:13px 20px;font:800 16px 'Outfit';cursor:pointer;transition:transform .15s,background .15s}
+.cta:hover{transform:scale(1.04);background:#ffbe3d}
+
+/* ---------- photo cards ---------- */
+.jump{margin:34px 0 14px;font-size:24px;font-weight:800}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.zc{position:relative;border:0;padding:0;border-radius:20px;overflow:hidden;cursor:pointer;aspect-ratio:4/5;background:var(--aub);
+  box-shadow:0 12px 28px rgba(30,18,72,.15);transition:transform .25s,box-shadow .25s;text-align:left;font-family:'Outfit'}
+.zc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.zc::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(30,18,72,0) 40%,rgba(30,18,72,.92) 100%)}
+.zc .t{position:absolute;left:16px;right:16px;bottom:14px;z-index:1;color:#fff}
+.zc .t b{display:block;font-size:20px;font-weight:800;line-height:1.1}
+.zc .t small{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--aub);background:var(--c,var(--gold));padding:3px 10px;border-radius:999px}
+.zc .b360{position:absolute;top:12px;right:12px;z-index:1;background:rgba(255,255,255,.92);color:var(--aub);font-weight:800;font-size:13px;padding:5px 10px;border-radius:999px}
+.zc:hover{transform:translateY(-6px);box-shadow:0 22px 40px rgba(30,18,72,.28)}
+.zc:hover img{transform:scale(1.08)}
+
+/* ---------- 360 viewer ---------- */
+.viewer{position:fixed;inset:0;z-index:9999;background:#0d0820;display:none;flex-direction:column}
+.viewer.open{display:flex}
+.vbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--aub);color:#fff;flex-wrap:wrap}
+.vbar .back{background:var(--gold);color:var(--aub);border:0;border-radius:999px;padding:9px 16px;font:800 14px 'Outfit';cursor:pointer}
+.vbar .vtitle{font-weight:800;font-size:20px;color:#fff}
+.vbar .vsub{font-size:14px;color:var(--teal2)}
+.chips{display:flex;gap:6px;margin-left:auto;overflow-x:auto;max-width:100%}
+.chips button{flex:none;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 12px;font:600 13px 'Outfit';cursor:pointer}
+.chips button.on{background:var(--teal);border-color:var(--teal)}
+#pano{flex:1;min-height:0}
+.strip{display:flex;gap:10px;padding:10px 16px;background:var(--aub);overflow-x:auto}
+.strip button{flex:none;width:128px;padding:0;border:3px solid transparent;border-radius:12px;overflow:hidden;cursor:pointer;background:none}
+.strip button img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
+.strip button.on{border-color:var(--gold)}
+.pnlm-hotspot-base.bts-info{width:34px;height:34px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 6px rgba(247,168,26,.35);display:flex;align-items:center;justify-content:center;font:800 18px 'Outfit';color:var(--aub)}
+.pnlm-hotspot-base.bts-info::before{content:"i"}
+.pnlm-tooltip span{font-family:'Outfit';font-size:15px}
+
+@media (max-width:760px){
+  .map{aspect-ratio:4/3}
+  .world img{left:-30%;top:12%;width:160%}
+  .pin .lbl{font-size:12px;padding:5px 10px}
+  .pin .peek{display:none}
+  .hint{font-size:12px}
+  .card{position:static;width:auto;margin:12px;transform:none}
+  .map.zoomed{overflow:visible;aspect-ratio:auto}
+}
+</style>
+</head>
+<body>
+<div class="bts-tour" id="btsTour">
+  <h2>Explore our spaces</h2>
+  <p class="lede">Every space at Brimbank Tech School was designed with a connection to the layers of Country. Tap a glowing pin to zoom in, then step inside in 360°.</p>
+
+  <div class="map" id="map">
+    <div class="world" id="world">
+      <img src="building.webp" alt="3D view of Brimbank Tech School">
+    </div>
+    <button class="topbtn" id="mapBack">← Whole building</button>
+    <div class="hint">Hover a pin to peek · tap to zoom in</div>
+    <div class="card" id="card"></div>
+  </div>
+
+  <div class="jump">Or jump straight in</div>
+  <div class="cards" id="cards"></div>
+</div>
+
+<div class="viewer" id="viewer">
+  <div class="vbar">
+    <button class="back" id="vBack">← Back</button>
+    <div><div class="vtitle" id="vTitle"></div><div class="vsub">Drag to look around · scroll or pinch to zoom</div></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div id="pano"></div>
+  <div class="strip" id="strip"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
+<script>
+(function(){
+  // Where the pano/, thumbs/ and building.webp files live. Change to a full URL once hosted.
+  var BASE = '';
+  var C = {teal:'#25AF9F', aub:'#1E1248', gold:'#F7A81A', melon:'#ED6B5E', green:'#7CC48A', light:'#3FD3C2'};
+
+  // px/py = pin position as % of the building picture. Move pins by changing these numbers.
+  var ZONES = [
+    {id:'forum', name:'Forum', px:66.5, py:72, col:C.melon, cover:'081',
+     desc:'The Forum is for people and community. It’s where we gather, connect and celebrate sharing stories and art.',
+     views:['081','082','083','079','080']},
+    {id:'outdoor', name:'Outdoor', px:44, py:38, col:C.green, cover:'124',
+     desc:'The Outdoor space is for connecting with Country (the land, sky and waterways), for ceremony and story.',
+     views:['124','087','107','108','109','110']},
+    {id:'ideation', name:'Ideation', px:39, py:74, col:C.teal, cover:'121',
+     desc:'The Ideation space is for researching, understanding and discovering, learning from people and planet.',
+     views:['121','073','071','072','119','120','070','118','069','117','084','085','122','074','075','091']},
+    {id:'esports', name:'E-Sports + Cyber', px:83, py:52, col:C.light, cover:'095',
+     desc:'The E-Sports & Cyber centre is about play, communication and collaboration, whilst also understanding the “back-end” and “behind the curtain” elements of tech.',
+     views:['095','093','094','096','092']},
+    {id:'data', name:'Data + Automation', px:66, py:32, col:C.teal, cover:'097',
+     desc:'The Data & Automation Lab is about understanding data, creating systems and making connections between people, place and planet.',
+     views:['097','098','123','088','089','090','111','099']},
+    {id:'design', name:'Design Studio', px:53, py:13, col:C.melon, cover:'103',
+     desc:'The Design Studio is about turning ideas into artworks, videos, games and products to improve the world around us.',
+     views:['103','102','104','105','106','100','101']},
+    {id:'meeting', name:'Meeting rooms', px:27, py:23, col:C.gold, cover:'113',
+     desc:'Boardroom and meeting spaces where teachers, partners and students plan, pitch and present.',
+     views:['113','112','114']},
+    {id:'studios', name:'Media studios', px:14, py:33, col:C.gold, cover:'066',
+     desc:'Podcast and video studios where students record, stream and produce their own content.',
+     views:['066','065','064','067','068','115','116']},
+    {id:'entry', name:'Entry', px:51, py:91, col:C.gold, cover:'078',
+     desc:'Our welcome space – the first stop for students, teachers and visitors arriving at Brimbank Tech School.',
+     views:['078','077','086','076']}
+  ];
+
+  // Info hotspots inside the 360s (yaw/pitch in degrees). Open the page with ?debug and click in a 360 to read exact values.
+  var INFO = {
+    '081':[{yaw:0,pitch:8,text:'Immersive LED wall'},{yaw:-70,pitch:-22,text:'Pebble seating for yarning circles and presentations'}],
+    '101':[{yaw:-85,pitch:-5,text:'3D printer farm'}],
+    '095':[{yaw:-4,pitch:8,text:'Cyber range video wall'},{yaw:-120,pitch:-18,text:'Pro-level e-sports stations'}],
+    '065':[{yaw:-9,pitch:-12,text:'Podcast and video studio'}],
+    '097':[{yaw:5,pitch:-8,text:'Welcome and tech help hub'}],
+    '113':[{yaw:0,pitch:-25,text:'Boardroom table'}],
+    '070':[{yaw:-45,pitch:-15,text:'Collaboration island'}],
+    '104':[{yaw:-22,pitch:-15,text:'High-performance workstations'}]
+  };
+
+  var map=document.getElementById('map'), world=document.getElementById('world'), card=document.getElementById('card');
+  var img=world.querySelector('img'); img.src=BASE+'building.webp';
+  var pins={}, current=null;
+
+  function pinPos(z){ // % of map box
+    var cs=getComputedStyle(img), l=parseFloat(cs.left)/map.clientWidth*100, t=parseFloat(cs.top)/map.clientHeight*100, w=img.clientWidth/map.clientWidth*100;
+    var h=img.clientHeight/map.clientHeight*100;
+    return {x:l+w*z.px/100, y:t+h*z.py/100};
+  }
+  function placePins(){ZONES.forEach(function(z){var p=pinPos(z);pins[z.id].style.left=p.x+'%';pins[z.id].style.top=p.y+'%';});if(current)zoomTo(current,true);}
+
+  ZONES.forEach(function(z){
+    var b=document.createElement('button');b.className='pin';b.style.setProperty('--c',z.col);b.setAttribute('aria-label',z.name);
+    b.innerHTML='<span class="peek"><img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span>'+z.views.length+' views in 360°</span></span><span class="lbl">'+z.name+'</span><span class="dot"></span>';
+    b.onclick=function(e){e.stopPropagation();current===z?openViewer(z.views[0]):focusZone(z)};
+    world.appendChild(b);pins[z.id]=b;
+  });
+  if(img.complete)placePins();else img.onload=placePins;
+  window.addEventListener('resize',placePins);
+
+  function zoomTo(z,instant){
+    var p=pinPos(z), s=window.innerWidth<760?1.9:2.3;
+    var tx=50-p.x*s, ty=50-p.y*s;
+    tx=Math.min(0,Math.max(100-100*s,tx)); ty=Math.min(0,Math.max(100-100*s,ty));
+    if(window.innerWidth>=760)tx=Math.min(0,tx+12); // leave room for the info card
+    world.style.transition=instant?'none':'';
+    world.style.setProperty('--s',s);world.style.transform='translate('+tx+'%,'+ty+'%) scale('+s+')';
+  }
+  function focusZone(z){
+    current=z;map.classList.add('zoomed');zoomTo(z);
+    for(var k in pins)pins[k].classList.toggle('active',k===z.id);
+    card.innerHTML='<div class="tag">'+z.views.length+' views in 360°</div><h3>'+z.name+'</h3><p>'+z.desc+'</p><button class="cta">Explore in 360° →</button>';
+    card.querySelector('.cta').onclick=function(){openViewer(z.views[0])};
+  }
+  function overview(){
+    current=null;map.classList.remove('zoomed');world.style.setProperty('--s',1);world.style.transform='';
+    for(var k in pins)pins[k].classList.remove('active');
+  }
+  document.getElementById('mapBack').onclick=overview;
+
+  // photo cards
+  var cards=document.getElementById('cards');
+  ZONES.forEach(function(z){
+    var b=document.createElement('button');b.className='zc';b.style.setProperty('--c',z.col);
+    b.innerHTML='<img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span class="b360">360°</span><span class="t"><b>'+z.name+'</b><small>'+z.views.length+' views</small></span>';
+    b.onclick=function(){openViewer(z.views[0])};cards.appendChild(b);
+  });
+
+  // 360 viewer
+  var viewer=null, vEl=document.getElementById('viewer'), zoneOf={};
+  ZONES.forEach(function(z){z.views.forEach(function(v){zoneOf[v]=z})});
+  function scenes(){var s={};
+    ZONES.forEach(function(z){z.views.forEach(function(v){
+      s['p'+v]={type:'equirectangular',panorama:BASE+'pano/p'+v+'.jpg',title:z.name,hfov:105,
+        hotSpots:(INFO[v]||[]).map(function(h){return {pitch:h.pitch,yaw:h.yaw,type:'info',text:h.text,cssClass:'pnlm-hotspot-base bts-info'}})};
+    })});return s;}
+  function openViewer(v){
+    vEl.classList.add('open');document.body.style.overflow='hidden';
+    // go full screen (works inside the Odoo iframe thanks to allow="fullscreen")
+    if(document.fullscreenEnabled&&!document.fullscreenElement){document.documentElement.requestFullscreen().catch(function(){});}
+    if(!viewer){
+      viewer=pannellum.viewer('pano',{default:{firstScene:'p'+v,sceneFadeDuration:700,autoLoad:true,compass:false,showFullscreenCtrl:false,
+        hotSpotDebug:/debug/.test(location.search)},scenes:scenes()});
+      viewer.on('scenechange',function(id){syncUI(id.slice(1))});
+    } else viewer.loadScene('p'+v);
+    syncUI(v);
+  }
+  var lastZone=null;
+  function syncUI(v){
+    var z=zoneOf[v];lastZone=z;document.getElementById('vTitle').textContent=z.name;
+    var chips=document.getElementById('chips');chips.innerHTML='';
+    ZONES.forEach(function(q){var b=document.createElement('button');b.textContent=q.name;if(q===z)b.className='on';
+      b.onclick=function(){viewer.loadScene('p'+q.views[0])};chips.appendChild(b);});
+    var strip=document.getElementById('strip');strip.innerHTML='';
+    z.views.forEach(function(w,i){var b=document.createElement('button');if(w===v)b.className='on';
+      b.innerHTML='<img alt="View '+(i+1)+'" loading="lazy" src="'+BASE+'thumbs/p'+w+'.jpg">';
+      b.onclick=function(){viewer.loadScene('p'+w)};strip.appendChild(b);});
+  }
+  function closeViewer(){vEl.classList.remove('open');document.body.style.overflow='';if(lastZone)focusZone(lastZone);
+    if(document.fullscreenElement){document.exitFullscreen().catch(function(){});}
+    if(window.parent===window)map.scrollIntoView({behavior:'smooth',block:'center'});}
+  document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&vEl.classList.contains('open'))closeViewer();});
+
+  // tell the Odoo page how tall this tour is, so the iframe fits with no inner scrollbar
+  function postH(){if(window.parent!==window)window.parent.postMessage({btsTourHeight:document.getElementById('btsTour').offsetHeight},'*');}
+  window.addEventListener('load',postH);window.addEventListener('resize',postH);
+  if(window.ResizeObserver)new ResizeObserver(postH).observe(document.getElementById('btsTour'));
+  document.getElementById('vBack').onclick=closeViewer;
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){vEl.classList.contains('open')?closeViewer():overview();}});
+})();
+</script>
+</body>
+</html>
