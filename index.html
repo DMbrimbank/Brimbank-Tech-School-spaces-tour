@@ -85,7 +85,7 @@ html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-s
 .chips button{flex:none;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 12px;font:600 13px 'Outfit';cursor:pointer}
 .chips button.on{background:var(--teal);border-color:var(--teal)}
 #pano{flex:1;min-height:0}
-.strip{display:flex;gap:10px;padding:10px 16px;background:var(--aub);overflow-x:auto}
+.strip{display:none;gap:10px;padding:10px 16px;background:var(--aub);overflow-x:auto}
 .strip button{flex:none;width:128px;padding:0;border:3px solid transparent;border-radius:12px;overflow:hidden;cursor:pointer;background:none}
 .strip button img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
 .strip button.on{border-color:var(--gold)}
@@ -143,43 +143,39 @@ html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-s
   var ZONES = [
     {id:'forum', name:'Forum', px:66.5, py:72, col:C.melon, cover:'081',
      desc:'The Forum is for people and community. It’s where we gather, connect and celebrate sharing stories and art.',
-     views:['081','082','083','079','080']},
+     views:['081']},
     {id:'outdoor', name:'Outdoor', px:44, py:38, col:C.green, cover:'124',
      desc:'The Outdoor space is for connecting with Country (the land, sky and waterways), for ceremony and story.',
-     views:['124','087','107','108','109','110']},
+     views:['124']},
     {id:'ideation', name:'Ideation', px:39, py:74, col:C.teal, cover:'121',
      desc:'The Ideation space is for researching, understanding and discovering, learning from people and planet.',
-     views:['121','073','071','072','119','120','070','118','069','117','084','085','122','074','075','091']},
+     views:['121']},
     {id:'esports', name:'E-Sports + Cyber', px:83, py:52, col:C.light, cover:'095',
      desc:'The E-Sports & Cyber centre is about play, communication and collaboration, whilst also understanding the “back-end” and “behind the curtain” elements of tech.',
-     views:['095','093','094','096','092']},
+     views:['095']},
     {id:'data', name:'Data + Automation', px:66, py:32, col:C.teal, cover:'097',
      desc:'The Data & Automation Lab is about understanding data, creating systems and making connections between people, place and planet.',
-     views:['097','098','123','088','089','090','111','099']},
+     views:['097']},
     {id:'design', name:'Design Studio', px:53, py:13, col:C.melon, cover:'103',
      desc:'The Design Studio is about turning ideas into artworks, videos, games and products to improve the world around us.',
-     views:['103','102','104','105','106','100','101']},
+     views:['103']},
     {id:'meeting', name:'Meeting rooms', px:27, py:23, col:C.gold, cover:'113',
      desc:'Boardroom and meeting spaces where teachers, partners and students plan, pitch and present.',
-     views:['113','112','114']},
+     views:['113']},
     {id:'studios', name:'Media studios', px:14, py:33, col:C.gold, cover:'066',
      desc:'Podcast and video studios where students record, stream and produce their own content.',
-     views:['066','065','064','067','068','115','116']},
+     views:['066']},
     {id:'entry', name:'Entry', px:51, py:91, col:C.gold, cover:'078',
      desc:'Our welcome space – the first stop for students, teachers and visitors arriving at Brimbank Tech School.',
-     views:['078','077','086','076']}
+     views:['078']}
   ];
 
   // Info hotspots inside the 360s (yaw/pitch in degrees). Open the page with ?debug and click in a 360 to read exact values.
   var INFO = {
     '081':[{yaw:0,pitch:8,text:'Immersive LED wall'},{yaw:-70,pitch:-22,text:'Pebble seating for yarning circles and presentations'}],
-    '101':[{yaw:-85,pitch:-5,text:'3D printer farm'}],
     '095':[{yaw:-4,pitch:8,text:'Cyber range video wall'},{yaw:-120,pitch:-18,text:'Pro-level e-sports stations'}],
-    '065':[{yaw:-9,pitch:-12,text:'Podcast and video studio'}],
     '097':[{yaw:5,pitch:-8,text:'Welcome and tech help hub'}],
-    '113':[{yaw:0,pitch:-25,text:'Boardroom table'}],
-    '070':[{yaw:-45,pitch:-15,text:'Collaboration island'}],
-    '104':[{yaw:-22,pitch:-15,text:'High-performance workstations'}]
+    '113':[{yaw:0,pitch:-25,text:'Boardroom table'}]
   };
 
   var map=document.getElementById('map'), world=document.getElementById('world'), card=document.getElementById('card');
@@ -195,7 +191,7 @@ html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-s
 
   ZONES.forEach(function(z){
     var b=document.createElement('button');b.className='pin';b.style.setProperty('--c',z.col);b.setAttribute('aria-label',z.name);
-    b.innerHTML='<span class="peek"><img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span>'+z.views.length+' views in 360°</span></span><span class="lbl">'+z.name+'</span><span class="dot"></span>';
+    b.innerHTML='<span class="peek"><img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span>Explore in 360°</span></span><span class="lbl">'+z.name+'</span><span class="dot"></span>';
     b.onclick=function(e){e.stopPropagation();current===z?openViewer(z.views[0]):focusZone(z)};
     world.appendChild(b);pins[z.id]=b;
   });
@@ -213,7 +209,7 @@ html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-s
   function focusZone(z){
     current=z;map.classList.add('zoomed');zoomTo(z);
     for(var k in pins)pins[k].classList.toggle('active',k===z.id);
-    card.innerHTML='<div class="tag">'+z.views.length+' views in 360°</div><h3>'+z.name+'</h3><p>'+z.desc+'</p><button class="cta">Explore in 360° →</button>';
+    card.innerHTML='<div class="tag">Explore in 360°</div><h3>'+z.name+'</h3><p>'+z.desc+'</p><button class="cta">Explore in 360° →</button>';
     card.querySelector('.cta').onclick=function(){openViewer(z.views[0])};
   }
   function overview(){
@@ -226,16 +222,18 @@ html,body{margin:0;background:var(--cream);font-family:'Outfit',system-ui,sans-s
   var cards=document.getElementById('cards');
   ZONES.forEach(function(z){
     var b=document.createElement('button');b.className='zc';b.style.setProperty('--c',z.col);
-    b.innerHTML='<img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span class="b360">360°</span><span class="t"><b>'+z.name+'</b><small>'+z.views.length+' views</small></span>';
+    b.innerHTML='<img alt="" loading="lazy" src="'+BASE+'thumbs/p'+z.cover+'.jpg"><span class="b360">360°</span><span class="t"><b>'+z.name+'</b><small>Explore in 360°</small></span>';
     b.onclick=function(){openViewer(z.views[0])};cards.appendChild(b);
   });
 
   // 360 viewer
+  // full 8K on capable computers, 4K on phones/tablets (their graphics chips cap at 4096px)
+  var HD=(function(){try{var c=document.createElement('canvas'),g=c.getContext('webgl');return !!g&&g.getParameter(g.MAX_TEXTURE_SIZE)>=8192&&window.innerWidth>=900&&!/Mobi|Android|iPad|iPhone/i.test(navigator.userAgent);}catch(e){return false;}})();
   var viewer=null, vEl=document.getElementById('viewer'), zoneOf={};
   ZONES.forEach(function(z){z.views.forEach(function(v){zoneOf[v]=z})});
   function scenes(){var s={};
     ZONES.forEach(function(z){z.views.forEach(function(v){
-      s['p'+v]={type:'equirectangular',panorama:BASE+'pano/p'+v+'.jpg',title:z.name,hfov:105,
+      s['p'+v]={type:'equirectangular',panorama:BASE+(HD?'pano-hd/':'pano/')+'p'+v+'.jpg',title:z.name,hfov:105,
         hotSpots:(INFO[v]||[]).map(function(h){return {pitch:h.pitch,yaw:h.yaw,type:'info',text:h.text,cssClass:'pnlm-hotspot-base bts-info'}})};
     })});return s;}
   function openViewer(v){
